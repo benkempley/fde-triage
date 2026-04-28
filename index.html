@@ -1,0 +1,2303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FDE Triage — PwC Deals AI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fraunces:ital,wght@0,300;0,600;0,700;1,300&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f4f3ef;--surface:#fff;--surface2:#f9f8f5;--border:#e2e0d8;--border-strong:#c8c5bc;--text:#1a1917;--muted:#6b6760;--muted2:#9b9890;--accent:#c8381a}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding-bottom:80px}
+header{background:var(--text);color:#fff;padding:20px 48px;display:flex;align-items:center;justify-content:space-between}
+.header-left{display:flex;align-items:center;gap:20px}
+.pwc-logo{font-family:'Fraunces',serif;font-weight:700;font-size:18px;color:var(--accent)}
+.header-divider{width:1px;height:28px;background:rgba(255,255,255,0.2)}
+.header-title{font-size:13px;color:rgba(255,255,255,0.6);letter-spacing:0.04em;text-transform:uppercase}
+.header-right{font-family:'DM Mono',monospace;font-size:11px;color:rgba(255,255,255,0.4);text-align:right;line-height:1.7}
+.summary-bar{background:var(--border);display:grid;grid-template-columns:repeat(5,1fr);gap:1px;border-bottom:1px solid var(--border)}
+.sum-cell{background:var(--surface);padding:20px 24px;text-align:center}
+.sum-val{font-family:'Fraunces',serif;font-size:36px;font-weight:600;line-height:1;letter-spacing:-0.03em}
+.sum-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;font-family:'DM Mono',monospace}
+.sum-accept{color:#1a7f4b}.sum-refer{color:#b45309}.sum-defer{color:#374151}.sum-clarify{color:#1d4ed8}
+.capacity-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 48px;display:flex;align-items:center;gap:24px}
+.cap-label{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;white-space:nowrap}
+.cap-track{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.cap-fill{height:100%;background:var(--accent);border-radius:3px}
+.cap-note{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;white-space:nowrap}
+.main{padding:32px 48px;display:grid;gap:16px}
+.queue-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:0.1em;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:4px;overflow:hidden}
+.card-header{display:flex;align-items:center;gap:16px;padding:16px 20px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.card-rank{font-family:'DM Mono',monospace;font-size:12px;color:var(--muted2);min-width:24px}
+.card-title-block{flex:1;min-width:0}
+.card-subject{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-sender{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-badges{display:flex;gap:6px;flex-shrink:0}
+.badge{font-family:'DM Mono',monospace;font-size:10px;padding:3px 8px;border-radius:2px;letter-spacing:0.05em;text-transform:uppercase;font-weight:500}
+.channel-badge{background:var(--bg);border:1px solid var(--border);color:var(--muted)}
+.action-badge{color:#fff}
+.card-total{font-family:'Fraunces',serif;font-size:28px;font-weight:600;letter-spacing:-0.02em;flex-shrink:0;min-width:60px;text-align:right}
+.of-30{font-size:14px;color:var(--muted)}
+.card-body{padding:20px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:16px}
+@media(max-width:900px){.two-col{grid-template-columns:1fr}}
+.section-label{font-family:'DM Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted2);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.summary-text{font-size:14px;line-height:1.6;margin-bottom:8px;font-weight:500}
+.rationale-text{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:8px;font-style:italic}
+.capacity-note{font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:12px;line-height:1.5}
+.action-note{font-size:12px;padding:6px 10px;border-radius:3px;margin-bottom:6px;line-height:1.5}
+.refer-note{background:#fef3c7;color:#92400e;border-left:3px solid #b45309}
+.clarify-note{background:#dbeafe;color:#1e3a8a;border-left:3px solid #1d4ed8}
+.indicators{display:grid;gap:7px;margin-top:12px}
+.ind-row{display:flex;align-items:center;gap:10px}
+.ind-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;min-width:148px;text-transform:uppercase;letter-spacing:0.03em}
+.ind-track{flex:1;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.ind-fill{height:100%;border-radius:2px}
+.ind-val{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);min-width:28px;text-align:right}
+.proposal-card{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:12px;margin-bottom:10px}
+.proposal-title{font-size:13px;font-weight:600;margin-bottom:4px;line-height:1.3}
+.proposal-meta{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-bottom:6px}
+.proposal-desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:6px}
+.proposal-assets{font-size:12px;line-height:1.5;margin-bottom:4px}
+.proposal-outcome{font-size:12px;color:var(--muted);line-height:1.5}
+.no-match{font-size:13px;color:var(--muted2);font-style:italic;font-family:'DM Mono',monospace}
+.raw-detail{margin-top:12px;border-top:1px solid var(--border);padding-top:12px}
+.raw-detail summary{font-size:12px;color:var(--muted);cursor:pointer;font-family:'DM Mono',monospace;user-select:none;padding:4px 0}
+.raw-detail summary:hover{color:var(--text)}
+.intake-table{width:100%;font-size:12px;font-family:'DM Mono',monospace;margin:10px 0;border-collapse:collapse}
+.intake-table td{padding:5px 10px;border:1px solid var(--border);vertical-align:top}
+.intake-table td:first-child{color:var(--muted);background:var(--bg);width:100px}
+.raw-body{margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:12px;font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);white-space:pre-wrap;word-break:break-word;line-height:1.6}
+.decision-bar{border-top:1px solid var(--border);padding-top:12px;margin-top:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.decision-label{font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:0.06em;margin-right:4px}
+.dec-btn{font-size:11px;font-family:'DM Mono',monospace;padding:5px 12px;border-radius:2px;border:1px solid var(--border);cursor:pointer;background:var(--surface);color:var(--muted);transition:all 0.15s}
+.dec-btn:hover{color:#fff;border-color:transparent}
+.dec-accept:hover{background:#1a7f4b}.dec-decline:hover{background:#c8381a}.dec-defer:hover{background:#374151}.dec-refer:hover{background:#b45309}
+.dec-status{font-size:11px;font-family:'DM Mono',monospace;color:var(--muted);font-style:italic}
+.analytics-section{background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:24px;margin-top:8px}
+.section-header{font-family:'DM Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted2);margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.analytics-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+.analytic-card{background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:16px;text-align:center}
+.analytic-val{font-family:'Fraunces',serif;font-size:32px;font-weight:600;letter-spacing:-0.02em}
+.analytic-label{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:4px;text-transform:uppercase;letter-spacing:0.06em}
+.outcome-table{width:100%;border-collapse:collapse;font-size:13px;font-family:'DM Mono',monospace}
+.outcome-table th,.outcome-table td{padding:8px 12px;border:1px solid var(--border);text-align:left}
+.outcome-table th{background:var(--bg);color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.06em}
+footer{padding:32px 48px 0;border-top:1px solid var(--border);margin-top:32px;font-size:11px;color:var(--muted2);font-family:'DM Mono',monospace;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="pwc-logo">PwC</div>
+    <div class="header-divider"></div>
+    <div class="header-title">Deals AI &mdash; FDE Intelligent Opportunity Triage</div>
+  </div>
+  <div class="header-right">
+    18 requests processed &middot; Scored by Claude Sonnet<br>
+    Generated 28 Apr 2026, 10:17 UTC
+  </div>
+</header>
+
+<div class="summary-bar">
+  <div class="sum-cell"><div class="sum-val sum-accept">6</div><div class="sum-label">Accept</div></div>
+  <div class="sum-cell"><div class="sum-val sum-clarify">4</div><div class="sum-label">Clarify</div></div>
+  <div class="sum-cell"><div class="sum-val sum-defer">0</div><div class="sum-label">Defer</div></div>
+  <div class="sum-cell"><div class="sum-val sum-refer">8</div><div class="sum-label">Refer out</div></div>
+  <div class="sum-cell"><div class="sum-val" style="color:var(--text)">18</div><div class="sum-label">Total</div></div>
+</div>
+
+<div class="capacity-bar">
+  <div class="cap-label">Team capacity &mdash; 4 of 12 FDEs available</div>
+  <div class="cap-track"><div class="cap-fill" style="width:67%"></div></div>
+  <div class="cap-note">2 joining within 3 weeks</div>
+</div>
+
+<div class="main">
+  <div class="queue-label">Prioritised queue &mdash; ranked by triage score, highest to lowest</div>
+  
+        <div class="card" id="card-1">
+          <div class="card-header" style="border-left:4px solid #1a7f4b">
+            <div class="card-rank">#1</div>
+            <div class="card-title-block">
+              <div class="card-subject">AI-assisted separation management capability — RFP — Cavendish Infrastructure Partners</div>
+              <div class="card-sender">"Ben & Indigo" <benandindigo@gmail.com></div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Email</span>
+              <span class="badge action-badge" style="background:#1a7f4b">ACCEPT</span>
+            </div>
+            <div class="card-total" style="color:#1a7f4b">28<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Cavendish Infrastructure Partners requests a six-month AI-assisted separation management capability for a 14-entity carve-out covering document classification, regulatory tracking, ERP dependency flagging, and SMO reporting, with £320k budget and two-week proposal deadline.</p>
+                <p class="rationale-text">Near-perfect match to strategic separation capability priority with exceptionally high reuse potential from prior multi-entity carve-out engagement, strong commercial profile, and complete specification.</p>
+                
+                <p class="capacity-note">With 4 FDEs available and high reuse from the prior Separation Management Capability build, a 1.5-2 FTE allocation over six months is feasible and aligns with the goal of growing external client work to 50%.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">Separation Management Capability — Multi-Entity Carve-Out</div>
+                  <div class="proposal-meta">Separation / carve-out &middot; 2025 &middot; 12 weeks &middot; 3 FDE(s)</div>
+                  <div class="proposal-desc">Designed and built an AI-assisted separation management capability covering document classification and entity ownership mapping, regulatory disclosure tracking, dependency flagging across ERP systems, and executive repo...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Document classification and entity mapping pipeline, Regulatory disclosure gap analysis framework, SMO reporting automation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> 6,000 documents classified and mapped to 12 legal entities in 2 weeks. Regulatory disclosure gaps surfaced 6 weeks before IPO deadline. SMO reporting time reduced by 80%.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">IC Pack Automation — Portfolio Reporting</div>
+                  <div class="proposal-meta">Portfolio management automation &middot; 2025 &middot; 4 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Built an agentic pipeline that collects structured monthly updates from portfolio companies via standardised forms, consolidates across 12 reporting templates, and generates a first-draft IC pack for review. Reduced mont...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Portfolio data collection schema, IC pack generation prompt and template, Multi-source consolidation pipeline</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> IC pack draft quality rated as publication-ready after minor edits. Fund team adopted independently. Framework reused for board reporting.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Integration Management Office Automation — Utilities Post-Close</div>
+                  <div class="proposal-meta">Post-merger integration &middot; 2025 &middot; 4 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Built an integration tracker with structured status ingestion via Teams adaptive cards, automated consolidation across 340 workstreams, and LLM-generated executive summary in client-approved format. Deployed for 100-day ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> IMO status ingestion schema, Executive summary generation prompt, Teams adaptive card template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Weekly reporting effort reduced from 14 hours to under 2 hours. Client adopted tool independently post-engagement. Executive summary quality rated highly by PE client.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>email</td></tr>
+                <tr><td>Source</td><td>Gmail API — live inbox</td></tr>
+                <tr><td>Sender</td><td>"Ben & Indigo" <benandindigo@gmail.com></td></tr>
+                <tr><td>Subject</td><td>AI-assisted separation management capability — RFP — Cavendish Infrastructure Partners</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.319285Z</td></tr>
+              </table>
+              <pre class="raw-body">Dear FDE Team,
+
+My name is Hannah Brooks and I am the Group CIO at Cavendish Infrastructure
+Partners, a UK-based infrastructure investor with £4.2bn AUM. I am writing
+following a recommendation from our financial advisers at Rothschild, who
+indicated that PwC has developed AI capabilities specifically for complex
+transaction processes.
+
+Cavendish is in the process of separating our UK regulated assets from our
+European portfolio ahead of a dual-track process — IPO and trade sale
+running simultaneously — expected to complete in Q4 of this year. The
+separation affects 14 legal entities across four jurisdictions,
+approximately 6,400 documents across three document management systems, and
+three ERP instances that are currently shared across both businesses.
+
+We are seeking a technology partner to design and build an AI-assisted
+separation management capability covering four workstreams:
+
+   1. Document classification and entity ownership mapping across all 6,400
+   docum...</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(1,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(1,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(1,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(1,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-1"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-2">
+          <div class="card-header" style="border-left:4px solid #1a7f4b">
+            <div class="card-rank">#2</div>
+            <div class="card-title-block">
+              <div class="card-subject">Urgent — AI support needed for data room management, carve-out process</div>
+              <div class="card-sender">Ben Kempley <benjohnkempley@gmail.com></div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Email</span>
+              <span class="badge action-badge" style="background:#1a7f4b">ACCEPT</span>
+            </div>
+            <div class="card-total" style="color:#1a7f4b">28<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">External client (FTSE 250 CFO) requests AI-assisted IRQ triage and response tracking tool for live carve-out data room with 1,247 requests, 17-day deadline, and £90k pre-approved budget.</p>
+                <p class="rationale-text">Near-perfect alignment with strategic priorities (client-facing carve-out work), highly reusable prior assets from identical use case, strong commercial profile, and genuine time-critical need with pre-approved budget and vendor clearance already complete.</p>
+                
+                <p class="capacity-note">With 4 of 12 FDEs available and strong reuse potential from the 2025 AI-Assisted Data Room Response Tracking carve-out engagement, a 2-FDE allocation for 10-12 days appears feasible to meet the 17-day deadline.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">AI-Assisted Data Room Response Tracking — Carve-Out</div>
+                  <div class="proposal-meta">Carve-out &middot; 2025 &middot; 3 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Built an automated information request triage and response tracking tool for a live carve-out data room. Ingested 900+ IRQs, matched against VDR documents, flagged gaps by bidder workstream, and generated draft status re...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> IRQ classification prompt library, Gap analysis template, VDR document matching pipeline</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Reduced manual response effort by 70%. Client met exclusivity milestone. Reusable IRQ matching pipeline archived.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Tax Document Triage Tool — Cross-Border Acquisition</div>
+                  <div class="proposal-meta">Due diligence — tax workstream &middot; 2024 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Built a targeted document triage tool for the tax workstream on a cross-border acquisition. Classified 180 documents by tax risk category (SDLT, VAT, deferred tax), flagged relevant clauses against defined criteria, and ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Tax risk classification prompt, Clause flagging framework, Issues log template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Review completed in 8 days vs. 3-week manual baseline. Issues log adopted as standard output format by tax workstream lead.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Separation Management Capability — Multi-Entity Carve-Out</div>
+                  <div class="proposal-meta">Separation / carve-out &middot; 2025 &middot; 12 weeks &middot; 3 FDE(s)</div>
+                  <div class="proposal-desc">Designed and built an AI-assisted separation management capability covering document classification and entity ownership mapping, regulatory disclosure tracking, dependency flagging across ERP systems, and executive repo...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Document classification and entity mapping pipeline, Regulatory disclosure gap analysis framework, SMO reporting automation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> 6,000 documents classified and mapped to 12 legal entities in 2 weeks. Regulatory disclosure gaps surfaced 6 weeks before IPO deadline. SMO reporting time reduced by 80%.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>email</td></tr>
+                <tr><td>Source</td><td>Gmail API — live inbox</td></tr>
+                <tr><td>Sender</td><td>Ben Kempley <benjohnkempley@gmail.com></td></tr>
+                <tr><td>Subject</td><td>Urgent — AI support needed for data room management, carve-out process</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.713778Z</td></tr>
+              </table>
+              <pre class="raw-body">Hi,
+
+My name is Sarah Chen and I am the CFO at Meridian Logistics Group, a FTSE
+250 logistics business with £2.1bn in annual turnover. I was given this
+contact by our lead adviser at Goldman Sachs who indicated your team has
+built AI tools for deals processes.
+
+We are currently six weeks into a carve-out of our European warehousing and
+last-mile delivery division ahead of a structured sale process being run by
+Goldman. Four PE bidders are in the process. The data room has been live
+for three weeks and we have now received 1,247 information requests across
+the four bidder workstreams.
+
+Our current response process is entirely manual. Three members of my team
+are tracking responses in a shared Excel file across three SharePoint
+sites, chasing document owners across eight business units, and writing
+status update emails by hand. Two of them have not taken a day off in four
+weeks.
+
+At our current response rate we will not meet our exclusivity milestone in
+17 days. The G...</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(2,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(2,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(2,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(2,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-2"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-3">
+          <div class="card-header" style="border-left:4px solid #1a7f4b">
+            <div class="card-rank">#3</div>
+            <div class="card-title-block">
+              <div class="card-subject">Call   Raj Mehta   Centaurus PE</div>
+              <div class="card-sender">Call   Raj Mehta   Centaurus PE</div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Phone</span>
+              <span class="badge action-badge" style="background:#1a7f4b">ACCEPT</span>
+            </div>
+            <div class="card-total" style="color:#1a7f4b">28<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Centaurus PE requests an 8-week post-close engagement to process 3-4TB of unstructured data (contracts, emails, board papers) to map commercial relationships, identify top 50 suppliers, extract contract terms, and flag change-of-control and exclusivity clauses triggered by their recent acquisition.</p>
+                <p class="rationale-text">Near-perfect match to existing 'Post-Close Commercial Relationship Mapping' work with high-value PE client, tight deadline, confirmed budget, and directly reusable technical assets that significantly de-risk delivery.</p>
+                
+                <p class="capacity-note">With 4 of 12 FDEs available and substantial reusable assets from the prior post-close engagement, this is feasible as a 2-FDE allocation over 8 weeks, though it will consume half current capacity.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">Post-Close Commercial Relationship Mapping — Unstructured Data</div>
+                  <div class="proposal-meta">Post-close integration — data intelligence &middot; 2025 &middot; 6 weeks &middot; 3 FDE(s)</div>
+                  <div class="proposal-desc">Built a pipeline to process large volumes of unstructured post-close data (contracts, emails, board papers) to map commercial relationships, identify top suppliers, extract contract terms, and flag change-of-control prov...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Contract clause extraction pipeline, Change-of-control detection prompt, Supplier relationship mapping schema</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Change-of-control provisions identified across 340 contracts in 3 weeks. Critical supplier concentration risk surfaced that was not visible pre-close. Client avoided two contract breaches.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Repeatable Diligence Playbook — Healthcare PE</div>
+                  <div class="proposal-meta">Buy-side due diligence — repeatable framework &middot; 2025 &middot; 6 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed and built a sector-specific repeatable diligence framework for a healthcare PE fund conducting 10+ deals per year. Codified standard question sets, document checklists, regulatory review criteria (CQC, NHS contr...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Healthcare diligence question library, CQC review prompt, NHS contract clause extractor</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence initiation time reduced from 5 days to under 4 hours per new deal. Framework reused on 8 subsequent processes without modification.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Internal Data Benchmarking Layer — Capital IQ and Origin</div>
+                  <div class="proposal-meta">Internal data infrastructure &middot; 2025 &middot; 8 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed a lightweight internal data layer providing curated, cached access to the most commonly used Capital IQ and Origin benchmarking datasets. Deal teams query via a simple natural language interface rather than pull...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Benchmarking data schema, Natural language query interface, Capital IQ caching pipeline</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Sector benchmarking time reduced from 2-3 days to under 30 minutes. Third-party data costs reduced by 40% through elimination of duplicate pulls across engagements.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>phone</td></tr>
+                <tr><td>Source</td><td>Otter.ai transcript — Call - Raj Mehta - Centaurus PE_otter_ai.txt</td></tr>
+                <tr><td>Sender</td><td>Call   Raj Mehta   Centaurus PE</td></tr>
+                <tr><td>Subject</td><td>Call   Raj Mehta   Centaurus PE</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.720593Z</td></tr>
+              </table>
+              <pre class="raw-body">0:01  
+Ben, so the situation is, we closed on this business about six weeks ago, and as part of integration diligence, we're now realizing the data situation is much worse than we thought going in. They've got somewhere in the region of three to four terabytes of unstructured data, contracts, supply emails, internal comms going back eight years, Board Papers, the lot. It's spread across two email servers, a legacy SharePoint and a file share that, honestly, nobody's properly maintained in years. It's a mess. What we need to do is map all the key commercial relationships. Who are the top 50 suppliers? What are the contract terms? Are there any change of control provisions that might have been triggered when we closed? Are they any exclusivity clauses that we've inherited that we weren't aware of manually, this is basically impossible with the timelines we're working to I was told by someone your D in your deals team, actually, that PwC had built something similar for another post. Close...</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(3,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(3,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(3,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(3,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-3"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-4">
+          <div class="card-header" style="border-left:4px solid #1a7f4b">
+            <div class="card-rank">#4</div>
+            <div class="card-title-block">
+              <div class="card-subject">New process — AI diligence capability — Albion Capital</div>
+              <div class="card-sender">Ben Kempley <ben@elliekempleyfoundation.co.uk></div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Email</span>
+              <span class="badge action-badge" style="background:#1a7f4b">ACCEPT</span>
+            </div>
+            <div class="card-total" style="color:#1a7f4b">27<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Albion Capital Partners requests replication of prior AI-assisted diligence capability for a new £80m healthcare SaaS acquisition, seeking to start within the week using the same Harvey-based document ingestion and issue flagging structure.</p>
+                <p class="rationale-text">High-value repeat client with near-identical scope to prior engagement, strong reuse potential, direct alignment with Harvey deployment and client-facing priorities, and urgent timeline justifies immediate allocation.</p>
+                
+                <p class="capacity-note">With 4 of 12 FDEs available and high reuse from prior Albion engagement and healthcare diligence playbook assets, a 1-2 FDE allocation for 2-3 weeks is feasible and strategically justified.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey-Assisted Due Diligence — Healthcare SaaS Acquisition</div>
+                  <div class="proposal-meta">Buy-side due diligence &middot; 2025 &middot; 4 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Configured and deployed Harvey Vault and custom Harvey workflows for a buy-side diligence process on a healthcare SaaS target. Built document ingestion pipeline, issue flagging by category (commercial, legal, technical, ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Harvey diligence workflow configuration, Issue categorisation prompt, Section summary template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence report drafted in 60% of normal time. Issue log generated with full source attribution. Client reused framework on two subsequent deals.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Repeatable Diligence Playbook — Healthcare PE</div>
+                  <div class="proposal-meta">Buy-side due diligence — repeatable framework &middot; 2025 &middot; 6 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed and built a sector-specific repeatable diligence framework for a healthcare PE fund conducting 10+ deals per year. Codified standard question sets, document checklists, regulatory review criteria (CQC, NHS contr...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Healthcare diligence question library, CQC review prompt, NHS contract clause extractor</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence initiation time reduced from 5 days to under 4 hours per new deal. Framework reused on 8 subsequent processes without modification.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Internal Data Benchmarking Layer — Capital IQ and Origin</div>
+                  <div class="proposal-meta">Internal data infrastructure &middot; 2025 &middot; 8 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed a lightweight internal data layer providing curated, cached access to the most commonly used Capital IQ and Origin benchmarking datasets. Deal teams query via a simple natural language interface rather than pull...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Benchmarking data schema, Natural language query interface, Capital IQ caching pipeline</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Sector benchmarking time reduced from 2-3 days to under 30 minutes. Third-party data costs reduced by 40% through elimination of duplicate pulls across engagements.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>email</td></tr>
+                <tr><td>Source</td><td>Gmail API — live inbox</td></tr>
+                <tr><td>Sender</td><td>Ben Kempley <ben@elliekempleyfoundation.co.uk></td></tr>
+                <tr><td>Subject</td><td>New process — AI diligence capability — Albion Capital</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.512539Z</td></tr>
+              </table>
+              <pre class="raw-body">Hi,
+
+Tom Gillespie here, Head of Corporate Development at Albion Capital
+Partners. We worked with your FDE team last year on the Nexus platform deal
+and I wanted to come back to you directly given how well that went.
+
+We have just opened a new process on a healthcare SaaS target — circa £80m
+EV, recurring revenue model, UK-domiciled — and we want to replicate the
+AI-assisted diligence capability your team built for us. Same structure as
+before: document ingestion, issue flagging by category, draft section
+summaries with source citations.
+
+We would like to kick off within the week if possible. Our GC is happy to
+reuse the same data handling framework and DPA we agreed last time — I have
+copied her on this email along with our operating partner so they are
+looped in from the start.
+
+We have already pulled the target's VDR access and can share credentials
+once you confirm capacity.
+
+Please let me know who to speak to and when you can get us on a call.
+
+Tom Gillespie ...</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(4,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(4,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(4,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(4,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-4"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-5">
+          <div class="card-header" style="border-left:4px solid #1a7f4b">
+            <div class="card-rank">#5</div>
+            <div class="card-title-block">
+              <div class="card-subject">Call   Marcus Webb   Fortis Healthcare</div>
+              <div class="card-sender">Call   Marcus Webb   Fortis Healthcare</div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Phone</span>
+              <span class="badge action-badge" style="background:#1a7f4b">ACCEPT</span>
+            </div>
+            <div class="card-total" style="color:#1a7f4b">26<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Healthcare PE fund (Fortis Healthcare, 12-15 deals/year) requests a codified AI diligence playbook for repeatable buy-side due diligence in healthcare services, with Q3 timeline, £60-80k budget, and willingness to fund scoping.</p>
+                <p class="rationale-text">Near-perfect alignment with strategic priorities and near-identical match to prior Repeatable Diligence Playbook engagement with extensive reusable assets, strong commercial profile, and ideal timing for planned delivery.</p>
+                
+                <p class="capacity-note">With 4 available FDEs and Q3 delivery target, capacity is adequate for scoping phase now and main build in Q2/Q3 without immediate resource strain.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">Repeatable Diligence Playbook — Healthcare PE</div>
+                  <div class="proposal-meta">Buy-side due diligence — repeatable framework &middot; 2025 &middot; 6 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed and built a sector-specific repeatable diligence framework for a healthcare PE fund conducting 10+ deals per year. Codified standard question sets, document checklists, regulatory review criteria (CQC, NHS contr...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Healthcare diligence question library, CQC review prompt, NHS contract clause extractor</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence initiation time reduced from 5 days to under 4 hours per new deal. Framework reused on 8 subsequent processes without modification.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey-Assisted Due Diligence — Healthcare SaaS Acquisition</div>
+                  <div class="proposal-meta">Buy-side due diligence &middot; 2025 &middot; 4 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Configured and deployed Harvey Vault and custom Harvey workflows for a buy-side diligence process on a healthcare SaaS target. Built document ingestion pipeline, issue flagging by category (commercial, legal, technical, ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Harvey diligence workflow configuration, Issue categorisation prompt, Section summary template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence report drafted in 60% of normal time. Issue log generated with full source attribution. Client reused framework on two subsequent deals.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">AI Value Creation Diagnostic — Facilities Management Portco</div>
+                  <div class="proposal-meta">Value creation / 100-day plan &middot; 2025 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Conducted a structured half-day diagnostic workshop with a PE client and portco leadership team in the facilities management sector. Produced a prioritised AI opportunity map across scheduling, workforce management, and ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> AI opportunity diagnostic framework, Facilities management use case library, EBITDA impact estimation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Client selected two initiatives for immediate piloting. Opportunity map adopted as board paper. Framework reused for two subsequent portco diagnostics.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>phone</td></tr>
+                <tr><td>Source</td><td>Otter.ai transcript — Call - Marcus Webb - Fortis Healthcare_otter_ai.txt</td></tr>
+                <tr><td>Sender</td><td>Call   Marcus Webb   Fortis Healthcare</td></tr>
+                <tr><td>Subject</td><td>Call   Marcus Webb   Fortis Healthcare</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.720009Z</td></tr>
+              </table>
+              <pre class="raw-body">0:01  
+Ben, yeah. So the situation with us is we do roughly 12 to 15 deals a year, almost all of them in healthcare services, GP practices, diagnostics, that kind of thing. And every single time we go through diligence, it's the same documents, the same question, sets, the same Reg, checks, CQC, register, registration, NHS, contract review, workforce, compliance, the works our analysts are basically doing the same thing 12 times a year from scratch, every time. And it's not like the deals are that different from each other, same sector, same issues, same red flags we're always looking for. It's just nobody's ever systematized it. We spoke to someone at a conference, I think it was your colleague, Toby, actually, who mentioned that PwC had built AI diligence tools. So that's why I'm calling we're not in an active deal right now. We just closed one last month, so there's no immediate pressure. But our next process will probably start in q3 and I want to have something ready before then, ...</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(5,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(5,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(5,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(5,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-5"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-6">
+          <div class="card-header" style="border-left:4px solid #1a7f4b">
+            <div class="card-rank">#6</div>
+            <div class="card-title-block">
+              <div class="card-subject">Call   Patrick OBrien   Redwood Ventures</div>
+              <div class="card-sender">Call   Patrick OBrien   Redwood Ventures</div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Phone</span>
+              <span class="badge action-badge" style="background:#1a7f4b">ACCEPT</span>
+            </div>
+            <div class="card-total" style="color:#1a7f4b">26<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Redwood Ventures seeks an agentic pipeline to automate monthly portfolio company data collection, consolidate 12 reporting templates, and generate draft IC packs, needed within 6 weeks with hands-on implementation support.</p>
+                <p class="rationale-text">Near-identical match to IC Pack Automation prior engagement with extensive reusable assets, strong strategic alignment, high urgency, and clear commercial value with manageable 2-3 week effort.</p>
+                
+                <p class="capacity-note">With 4 of 12 FDEs available and extensive reuse potential from prior IC Pack Automation build, this is feasible as a 2-3 week engagement with one FDE plus implementation support.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1a7f4b"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">IC Pack Automation — Portfolio Reporting</div>
+                  <div class="proposal-meta">Portfolio management automation &middot; 2025 &middot; 4 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Built an agentic pipeline that collects structured monthly updates from portfolio companies via standardised forms, consolidates across 12 reporting templates, and generates a first-draft IC pack for review. Reduced mont...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Portfolio data collection schema, IC pack generation prompt and template, Multi-source consolidation pipeline</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> IC pack draft quality rated as publication-ready after minor edits. Fund team adopted independently. Framework reused for board reporting.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">AI Value Creation Diagnostic — Facilities Management Portco</div>
+                  <div class="proposal-meta">Value creation / 100-day plan &middot; 2025 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Conducted a structured half-day diagnostic workshop with a PE client and portco leadership team in the facilities management sector. Produced a prioritised AI opportunity map across scheduling, workforce management, and ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> AI opportunity diagnostic framework, Facilities management use case library, EBITDA impact estimation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Client selected two initiatives for immediate piloting. Opportunity map adopted as board paper. Framework reused for two subsequent portco diagnostics.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Integration Management Office Automation — Utilities Post-Close</div>
+                  <div class="proposal-meta">Post-merger integration &middot; 2025 &middot; 4 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Built an integration tracker with structured status ingestion via Teams adaptive cards, automated consolidation across 340 workstreams, and LLM-generated executive summary in client-approved format. Deployed for 100-day ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> IMO status ingestion schema, Executive summary generation prompt, Teams adaptive card template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Weekly reporting effort reduced from 14 hours to under 2 hours. Client adopted tool independently post-engagement. Executive summary quality rated highly by PE client.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>phone</td></tr>
+                <tr><td>Source</td><td>Otter.ai transcript — Call - Patrick OBrien - Redwood Ventures_otter_ai.txt</td></tr>
+                <tr><td>Sender</td><td>Call   Patrick OBrien   Redwood Ventures</td></tr>
+                <tr><td>Subject</td><td>Call   Patrick OBrien   Redwood Ventures</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.720319Z</td></tr>
+              </table>
+              <pre class="raw-body">0:01  
+Ben, yes. So the core problem is our deal team spends something like 35 maybe 40% of their time just on information management, chasing monthly updates from portfolio companies, consolidating 12 different reporting templates into one format, then reformatting the whole thing just for the IC pack. It's three people, two days each, every single month, just to produce a document that our investment committee then reads for about 20 minutes. We've tried a couple off the shelf tools, one of the portfolio reporting platforms, I won't name them, and a general AI assistant. And neither of them fit how we actually work. The reporting platform was too rigid. The AI assistant just didn't understand the context of what we're asking it to do. What we actually want is something that sits inside our existing workflow, pulls the data from portfolio companies automatically through some some kind of structured collection mechanism, and generates a first draft of the IC pack that a team just needs...</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(6,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(6,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(6,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(6,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-6"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-7">
+          <div class="card-header" style="border-left:4px solid #b45309">
+            <div class="card-rank">#7</div>
+            <div class="card-title-block">
+              <div class="card-subject">AI assistant for investment research function — partnership inquiry</div>
+              <div class="card-sender">Benjamin Kempley <elliekempleyscholarship@gmail.com></div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Email</span>
+              <span class="badge action-badge" style="background:#b45309">REFER</span>
+            </div>
+            <div class="card-total" style="color:#b45309">22<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Hargreave Asset Management requests a 90-day AI assistant build for their investment research function (220 analysts globally) to query earnings transcripts, filings, and research notes, with £400k budget.</p>
+                <p class="rationale-text">This is a high-value, well-specified engagement but falls outside FDE's Deals mandate and would be better served by PwC's broader Financial Services AI or Technology Consulting teams.</p>
+                <div class="action-note refer-note">Refer to: PwC Financial Services Technology Consulting or PwC AI/Data practice with asset management specialization — this is an investment management enterprise AI build, not a Deals workflow, and requires asset management domain expertise the FDE team doesn't focus on</div>
+                <p class="capacity-note">With 4 of 12 FDEs available and strategic priority to grow external client work, capacity exists but should be reserved for Deals-aligned opportunities given team mandate.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">Internal Data Benchmarking Layer — Capital IQ and Origin</div>
+                  <div class="proposal-meta">Internal data infrastructure &middot; 2025 &middot; 8 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed a lightweight internal data layer providing curated, cached access to the most commonly used Capital IQ and Origin benchmarking datasets. Deal teams query via a simple natural language interface rather than pull...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Benchmarking data schema, Natural language query interface, Capital IQ caching pipeline</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Sector benchmarking time reduced from 2-3 days to under 30 minutes. Third-party data costs reduced by 40% through elimination of duplicate pulls across engagements.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">AI Value Creation Diagnostic — Facilities Management Portco</div>
+                  <div class="proposal-meta">Value creation / 100-day plan &middot; 2025 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Conducted a structured half-day diagnostic workshop with a PE client and portco leadership team in the facilities management sector. Produced a prioritised AI opportunity map across scheduling, workforce management, and ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> AI opportunity diagnostic framework, Facilities management use case library, EBITDA impact estimation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Client selected two initiatives for immediate piloting. Opportunity map adopted as board paper. Framework reused for two subsequent portco diagnostics.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey Adoption Sprint — Deal Team Training</div>
+                  <div class="proposal-meta">Internal enablement &middot; 2026 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Designed sector-specific Harvey worked examples and before/after demonstrations for a mid-market M&A and restructuring audience. Built a library of 40 prompt examples across deal types. Delivered half-day training sessio...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Harvey prompt library — mid-market M&A, Harvey prompt library — restructuring, Before/after demonstration scripts</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Harvey active usage increased 60% in participating offices in the month following training. Prompt library adopted as standard onboarding resource.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>email</td></tr>
+                <tr><td>Source</td><td>Gmail API — live inbox</td></tr>
+                <tr><td>Sender</td><td>Benjamin Kempley <elliekempleyscholarship@gmail.com></td></tr>
+                <tr><td>Subject</td><td>AI assistant for investment research function — partnership inquiry</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.104898Z</td></tr>
+              </table>
+              <pre class="raw-body">Hi,
+
+My name is Dominic Fraser, CTO at Hargreave Asset Management, a global
+asset manager with approximately £180bn AUM. I am reaching out because we
+are scoping a build of an internal AI assistant for our investment research
+function and are looking for a delivery partner.
+
+We have approximately 220 analysts globally across London, New York,
+Singapore, and Hong Kong. The system needs to ingest earnings call
+transcripts, sell-side analyst reports, regulatory filings — 10-K, 20-F,
+prospectuses — and proprietary internal research notes, and allow analysts
+to query across all of them in natural language with full source
+attribution.
+
+I should be transparent: this is not a Deals-specific use case. It is an
+enterprise AI product for our investment management business. We are
+approaching PwC given our existing audit relationship and our preference to
+work with a trusted partner on sensitive research data. Budget is £400,000
+and our preferred timeline is a working prototype ...</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(7,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(7,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(7,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(7,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-7"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-8">
+          <div class="card-header" style="border-left:4px solid #1d4ed8">
+            <div class="card-rank">#8</div>
+            <div class="card-title-block">
+              <div class="card-subject">(Teams message — no subject)</div>
+              <div class="card-sender">James Okafor — Senior Manager, Deals Financial Advisory</div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Teams</span>
+              <span class="badge action-badge" style="background:#1d4ed8">CLARIFY</span>
+            </div>
+            <div class="card-total" style="color:#1d4ed8">20<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Sell-side financial services client requests AI tool to pre-empt buyer due diligence questions on their loan book ahead of data room opening, with response needed by end of week and potential 2-3 week engagement.</p>
+                <p class="rationale-text">Strong strategic fit and commercial potential but insufficient detail on scope, deliverables, client budget authority, and technical requirements to commit FDE resources within the tight response window.</p>
+                <div class="action-note clarify-note">Information needed: Need clarity on: (1) specific deliverable format (tool vs analysis vs workflow), (2) data access and loan book structure/size, (3) client budget range and decision-maker involvement, (4) whether this is sell-side advisory scope or standalone AI engagement, and (5) James's availability for scoping call within 24 hours to assess build vs configure approach.</div>
+                <p class="capacity-note">With 4 of 12 FDEs available, a 2-3 week engagement is feasible if scoped tightly, but requires rapid clarity to avoid speculative resource allocation.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">AI-Assisted Data Room Response Tracking — Carve-Out</div>
+                  <div class="proposal-meta">Carve-out &middot; 2025 &middot; 3 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Built an automated information request triage and response tracking tool for a live carve-out data room. Ingested 900+ IRQs, matched against VDR documents, flagged gaps by bidder workstream, and generated draft status re...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> IRQ classification prompt library, Gap analysis template, VDR document matching pipeline</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Reduced manual response effort by 70%. Client met exclusivity milestone. Reusable IRQ matching pipeline archived.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">AI Value Creation Diagnostic — Facilities Management Portco</div>
+                  <div class="proposal-meta">Value creation / 100-day plan &middot; 2025 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Conducted a structured half-day diagnostic workshop with a PE client and portco leadership team in the facilities management sector. Produced a prioritised AI opportunity map across scheduling, workforce management, and ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> AI opportunity diagnostic framework, Facilities management use case library, EBITDA impact estimation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Client selected two initiatives for immediate piloting. Opportunity map adopted as board paper. Framework reused for two subsequent portco diagnostics.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey-Assisted Due Diligence — Healthcare SaaS Acquisition</div>
+                  <div class="proposal-meta">Buy-side due diligence &middot; 2025 &middot; 4 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Configured and deployed Harvey Vault and custom Harvey workflows for a buy-side diligence process on a healthcare SaaS target. Built document ingestion pipeline, issue flagging by category (commercial, legal, technical, ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Harvey diligence workflow configuration, Issue categorisation prompt, Section summary template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence report drafted in 60% of normal time. Issue log generated with full source attribution. Client reused framework on two subsequent deals.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>teams</td></tr>
+                <tr><td>Source</td><td>Microsoft Teams — teams_06_james_okafor.json</td></tr>
+                <tr><td>Sender</td><td>James Okafor — Senior Manager, Deals Financial Advisory</td></tr>
+                <tr><td>Subject</td><td>(Teams message — no subject)</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.716643Z</td></tr>
+              </table>
+              <pre class="raw-body">Hey — bit of a live one. Got a financial services client (mid-market lender, can't name them yet) running a sell-side process and they're asking whether we can use AI to help them get ahead of buyer questions on their loan book. Essentially they want to pre-empt the kind of questions bidders will ask and have answers ready before the data room opens.
+
+Think there's a real opportunity here but client is moving fast — they need a response from us by end of week on whether we can help and roughly what it would look like. I don't have a full brief yet but I can get you on a call tomorrow if you're able. Revenue would be client-facing so there's a commercial angle. Probably 2-3 week engagement if it goes ahead.</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(8,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(8,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(8,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(8,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-8"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-9">
+          <div class="card-header" style="border-left:4px solid #1d4ed8">
+            <div class="card-rank">#9</div>
+            <div class="card-title-block">
+              <div class="card-subject">(Teams message — no subject)</div>
+              <div class="card-sender">Sylvie Imbert — D&A Lead, Deals Technology</div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Teams</span>
+              <span class="badge action-badge" style="background:#1d4ed8">CLARIFY</span>
+            </div>
+            <div class="card-total" style="color:#1d4ed8">19<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Internal request to design a lightweight cached data layer for commonly-used Capital IQ and Origin benchmarking datasets, queryable via simple interface to reduce repetitive data pulls across deal teams.</p>
+                <p class="rationale-text">Near-identical proposal already exists (Internal Data Benchmarking Layer 2025) with reusable assets, but request lacks clarity on whether this is a new build, enhancement, or redeployment of prior work.</p>
+                <div class="action-note clarify-note">Information needed: Confirm awareness of 2025 Internal Data Benchmarking Layer project; clarify if this is requesting completion, enhancement, scale-up, or separate build; specify desired scope, timeline expectations, and whether prior assets are accessible.</div>
+                <p class="capacity-note">With 4 of 12 FDEs available, a medium-complexity internal infrastructure project is feasible but would consume significant capacity better directed toward strategic client-facing priorities unless prior assets dramatically reduce effort.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">Internal Data Benchmarking Layer — Capital IQ and Origin</div>
+                  <div class="proposal-meta">Internal data infrastructure &middot; 2025 &middot; 8 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed a lightweight internal data layer providing curated, cached access to the most commonly used Capital IQ and Origin benchmarking datasets. Deal teams query via a simple natural language interface rather than pull...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Benchmarking data schema, Natural language query interface, Capital IQ caching pipeline</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Sector benchmarking time reduced from 2-3 days to under 30 minutes. Third-party data costs reduced by 40% through elimination of duplicate pulls across engagements.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey Adoption Sprint — Deal Team Training</div>
+                  <div class="proposal-meta">Internal enablement &middot; 2026 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Designed sector-specific Harvey worked examples and before/after demonstrations for a mid-market M&A and restructuring audience. Built a library of 40 prompt examples across deal types. Delivered half-day training sessio...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Harvey prompt library — mid-market M&A, Harvey prompt library — restructuring, Before/after demonstration scripts</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Harvey active usage increased 60% in participating offices in the month following training. Prompt library adopted as standard onboarding resource.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">AI Value Creation Diagnostic — Facilities Management Portco</div>
+                  <div class="proposal-meta">Value creation / 100-day plan &middot; 2025 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Conducted a structured half-day diagnostic workshop with a PE client and portco leadership team in the facilities management sector. Produced a prioritised AI opportunity map across scheduling, workforce management, and ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> AI opportunity diagnostic framework, Facilities management use case library, EBITDA impact estimation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Client selected two initiatives for immediate piloting. Opportunity map adopted as board paper. Framework reused for two subsequent portco diagnostics.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>teams</td></tr>
+                <tr><td>Source</td><td>Microsoft Teams — teams_17_sylvie_imbert.json</td></tr>
+                <tr><td>Sender</td><td>Sylvie Imbert — D&A Lead, Deals Technology</td></tr>
+                <tr><td>Subject</td><td>(Teams message — no subject)</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.718788Z</td></tr>
+              </table>
+              <pre class="raw-body">Raising something I've been thinking about for a while. Deal teams are pulling the same third-party data sets repeatedly — Origin, Capital IQ benchmarking — for sector analysis, and every time it takes 2-3 days to pull, format, and contextualise. We're also paying for the same data multiple times across engagements.
+
+Wondering if FDE could help design a lightweight internal data layer — a curated, cached version of the most commonly-used benchmarking data that deal teams can query through a simple interface rather than starting from scratch each time. Medium-term project, no fixed deadline, but the efficiency gain would be material if it worked well. Happy to spec it out together if there's appetite.</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(9,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(9,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(9,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(9,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-9"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-10">
+          <div class="card-header" style="border-left:4px solid #b45309">
+            <div class="card-rank">#10</div>
+            <div class="card-title-block">
+              <div class="card-subject">AI-powered HR analytics platform — partnership inquiry</div>
+              <div class="card-sender">Ben Kempley <benjohnkempley@gmail.com></div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Email</span>
+              <span class="badge action-badge" style="background:#b45309">REFER</span>
+            </div>
+            <div class="card-total" style="color:#b45309">18<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">External request from Apex Financial Services CHRO to build an AI-powered HR analytics platform covering recruitment, attrition prediction, and workforce planning across 4,200 employees, with 60-day proof of concept timeline and £500k budget.</p>
+                <p class="rationale-text">Well-specified commercial opportunity with strong budget and urgency, but HR analytics is outside Deals FDE mandate focused on M&A transactions, due diligence, and deal workflows.</p>
+                <div class="action-note refer-note">Refer to: PwC People & Organisation practice or PwC's central AI/Data capabilities team specialising in HR technology and workforce analytics</div>
+                <p class="capacity-note">While 4 FDEs are available, this engagement falls outside the Deals remit and should be handled by HR-specialised teams aligned with People & Organisation practice areas.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey QoE Pre-Processing Pipeline</div>
+                  <div class="proposal-meta">Internal tooling &middot; 2026 &middot; 3 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Built an automated pre-processing pipeline that ingests raw management accounts in varied formats (Excel, PDF, CSV, Word), normalises to a standard financial schema, validates for completeness, flags anomalies, and passe...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Multi-format financial data parser, Schema normalisation pipeline, Harvey API integration module</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Eliminated 2-day manual data preparation step per client. Pipeline adopted as standard pre-processor for all Harvey financial workflows. On roadmap for wider rollout.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Repeatable Diligence Playbook — Healthcare PE</div>
+                  <div class="proposal-meta">Buy-side due diligence — repeatable framework &middot; 2025 &middot; 6 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed and built a sector-specific repeatable diligence framework for a healthcare PE fund conducting 10+ deals per year. Codified standard question sets, document checklists, regulatory review criteria (CQC, NHS contr...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Healthcare diligence question library, CQC review prompt, NHS contract clause extractor</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence initiation time reduced from 5 days to under 4 hours per new deal. Framework reused on 8 subsequent processes without modification.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">AI Value Creation Diagnostic — Facilities Management Portco</div>
+                  <div class="proposal-meta">Value creation / 100-day plan &middot; 2025 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Conducted a structured half-day diagnostic workshop with a PE client and portco leadership team in the facilities management sector. Produced a prioritised AI opportunity map across scheduling, workforce management, and ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> AI opportunity diagnostic framework, Facilities management use case library, EBITDA impact estimation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Client selected two initiatives for immediate piloting. Opportunity map adopted as board paper. Framework reused for two subsequent portco diagnostics.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>email</td></tr>
+                <tr><td>Source</td><td>Gmail API — live inbox</td></tr>
+                <tr><td>Sender</td><td>Ben Kempley <benjohnkempley@gmail.com></td></tr>
+                <tr><td>Subject</td><td>AI-powered HR analytics platform — partnership inquiry</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:53.677511Z</td></tr>
+              </table>
+              <pre class="raw-body">Hi,
+
+My name is Jennifer Walsh and I am the Chief Human Resources Officer at
+Apex Financial Services. I am contacting you via the PwC website inquiry
+form as we are seeking a partner to design and build an AI-powered HR
+analytics platform.
+
+The platform would cover three areas: recruitment pipeline analysis and
+candidate scoring, attrition prediction modelling using historical
+workforce data, and workforce planning optimisation across our five
+European offices. We have approximately 4,200 employees in total.
+
+Our target is a working proof of concept within 60 days, with full
+deployment planned for end of year. Budget has been approved at £500,000.
+
+We are currently in conversations with two other providers so a timely
+response would be appreciated.
+
+Jennifer Walsh CHRO, Apex Financial Services</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(10,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(10,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(10,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(10,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-10"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-11">
+          <div class="card-header" style="border-left:4px solid #1d4ed8">
+            <div class="card-rank">#11</div>
+            <div class="card-title-block">
+              <div class="card-subject">(Teams message — no subject)</div>
+              <div class="card-sender">Rachel Torres — Manager, Deals Value Creation</div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Teams</span>
+              <span class="badge action-badge" style="background:#1d4ed8">CLARIFY</span>
+            </div>
+            <div class="card-total" style="color:#1d4ed8">18<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Request for a half-day AI value creation diagnostic workshop and two-pager for a facilities management portco, focusing on scheduling, workforce management, and procurement opportunities, targeting next month with no confirmed budget.</p>
+                <p class="rationale-text">Nearly identical to prior facilities management AI Value Creation Diagnostic with full asset reuse potential, but requires budget confirmation and client commitment before FDE allocation.</p>
+                <div class="action-note clarify-note">Information needed: Need confirmation of: (1) formal budget approval and commercial terms, (2) committed client availability and specific workshop date, (3) whether this is part of a broader PE relationship with potential for follow-on work, and (4) expectation for FDE involvement beyond workshop delivery (e.g., implementation support).</div>
+                <p class="capacity-note">With 4 of 12 FDEs available and high reuse potential, a 0.5-1 FDE-day commitment is feasible once commercial terms are confirmed.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:80%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">4/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">AI Value Creation Diagnostic — Facilities Management Portco</div>
+                  <div class="proposal-meta">Value creation / 100-day plan &middot; 2025 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Conducted a structured half-day diagnostic workshop with a PE client and portco leadership team in the facilities management sector. Produced a prioritised AI opportunity map across scheduling, workforce management, and ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> AI opportunity diagnostic framework, Facilities management use case library, EBITDA impact estimation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Client selected two initiatives for immediate piloting. Opportunity map adopted as board paper. Framework reused for two subsequent portco diagnostics.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Repeatable Diligence Playbook — Healthcare PE</div>
+                  <div class="proposal-meta">Buy-side due diligence — repeatable framework &middot; 2025 &middot; 6 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed and built a sector-specific repeatable diligence framework for a healthcare PE fund conducting 10+ deals per year. Codified standard question sets, document checklists, regulatory review criteria (CQC, NHS contr...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Healthcare diligence question library, CQC review prompt, NHS contract clause extractor</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence initiation time reduced from 5 days to under 4 hours per new deal. Framework reused on 8 subsequent processes without modification.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey-Assisted Due Diligence — Healthcare SaaS Acquisition</div>
+                  <div class="proposal-meta">Buy-side due diligence &middot; 2025 &middot; 4 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Configured and deployed Harvey Vault and custom Harvey workflows for a buy-side diligence process on a healthcare SaaS target. Built document ingestion pipeline, issue flagging by category (commercial, legal, technical, ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Harvey diligence workflow configuration, Issue categorisation prompt, Section summary template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence report drafted in 60% of normal time. Issue log generated with full source attribution. Client reused framework on two subsequent deals.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>teams</td></tr>
+                <tr><td>Source</td><td>Microsoft Teams — teams_13_rachel_torres.json</td></tr>
+                <tr><td>Sender</td><td>Rachel Torres — Manager, Deals Value Creation</td></tr>
+                <tr><td>Subject</td><td>(Teams message — no subject)</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.717813Z</td></tr>
+              </table>
+              <pre class="raw-body">Working on a 100-day plan for a portco in the facilities management space — cleaning, security, maintenance services, about 3,000 employees. PE client wants to understand where AI could drive EBITDA improvement, specifically in scheduling, workforce management, and procurement. Nothing too technically complex — more of a structured diagnostic and prioritised opportunity map.
+
+Would an FDE be able to do a half-day workshop with us and the client and then produce a two-pager output? Aiming for sometime next month. No formal budget agreed yet but PE client is supportive in principle. Would be useful to have some concrete examples to show them of what's been done in similar businesses.</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(11,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(11,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(11,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(11,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-11"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-12">
+          <div class="card-header" style="border-left:4px solid #b45309">
+            <div class="card-rank">#12</div>
+            <div class="card-title-block">
+              <div class="card-subject">AI agent build inquiry — operational technology monitoring</div>
+              <div class="card-sender">"Ben & Indigo" <benandindigo@gmail.com></div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Email</span>
+              <span class="badge action-badge" style="background:#b45309">REFER</span>
+            </div>
+            <div class="card-total" style="color:#b45309">17<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">National Grid seeks AI agent build for real-time anomaly detection and predictive maintenance across 14,000 operational technology monitoring points, budget £800k-£1.2m, Q3 pilot target.</p>
+                <p class="rationale-text">High-value opportunity but operationally focused IoT/OT infrastructure monitoring falls outside Deals AI Forward Deployed Engineering mandate and capability areas.</p>
+                <div class="action-note refer-note">Refer to: PwC Digital Engineering or Technology Consulting practice with operational technology, IoT, and industrial AI capabilities — likely the Energy & Utilities sector technology team</div>
+                <p class="capacity-note">While 4 FDEs are available, this operational technology and sensor data infrastructure project is not a Deals workflow use case and requires specialized OT/IIoT expertise the FDE team does not maintain.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey Adoption Sprint — Deal Team Training</div>
+                  <div class="proposal-meta">Internal enablement &middot; 2026 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Designed sector-specific Harvey worked examples and before/after demonstrations for a mid-market M&A and restructuring audience. Built a library of 40 prompt examples across deal types. Delivered half-day training sessio...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Harvey prompt library — mid-market M&A, Harvey prompt library — restructuring, Before/after demonstration scripts</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Harvey active usage increased 60% in participating offices in the month following training. Prompt library adopted as standard onboarding resource.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Internal Data Benchmarking Layer — Capital IQ and Origin</div>
+                  <div class="proposal-meta">Internal data infrastructure &middot; 2025 &middot; 8 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed a lightweight internal data layer providing curated, cached access to the most commonly used Capital IQ and Origin benchmarking datasets. Deal teams query via a simple natural language interface rather than pull...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Benchmarking data schema, Natural language query interface, Capital IQ caching pipeline</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Sector benchmarking time reduced from 2-3 days to under 30 minutes. Third-party data costs reduced by 40% through elimination of duplicate pulls across engagements.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">AI Value Creation Diagnostic — Facilities Management Portco</div>
+                  <div class="proposal-meta">Value creation / 100-day plan &middot; 2025 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Conducted a structured half-day diagnostic workshop with a PE client and portco leadership team in the facilities management sector. Produced a prioritised AI opportunity map across scheduling, workforce management, and ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> AI opportunity diagnostic framework, Facilities management use case library, EBITDA impact estimation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Client selected two initiatives for immediate piloting. Opportunity map adopted as board paper. Framework reused for two subsequent portco diagnostics.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>email</td></tr>
+                <tr><td>Source</td><td>Gmail API — live inbox</td></tr>
+                <tr><td>Sender</td><td>"Ben & Indigo" <benandindigo@gmail.com></td></tr>
+                <tr><td>Subject</td><td>AI agent build inquiry — operational technology monitoring</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:53.496927Z</td></tr>
+              </table>
+              <pre class="raw-body">Hi,
+
+My name is Dominic Reeve, Head of Technology Transformation at National
+Grid. I am writing to explore whether PwC has capability in AI-powered
+operational technology monitoring.
+
+We are in early scoping for a project involving AI agents for real-time
+anomaly detection and predictive maintenance across our UK transmission
+network. This would involve ingesting sensor data from approximately 14,000
+monitoring points, training on three years of historical fault data, and
+building an alerting and triage layer for our operational control centres.
+
+We are at an early stage and would welcome an initial conversation to
+understand whether this falls within your capability set. Budget range is
+£800,000 to £1.2m for phase one. Timeline is flexible — we are targeting a
+pilot in Q3.
+
+Please let me know if this is something your team works on and who the
+right person to speak to would be.
+
+Dominic Reeve Head of Technology Transformation, National Grid</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(12,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(12,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(12,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(12,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-12"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-13">
+          <div class="card-header" style="border-left:4px solid #b45309">
+            <div class="card-rank">#13</div>
+            <div class="card-title-block">
+              <div class="card-subject">Build and transfer conversation — AI integration capability</div>
+              <div class="card-sender">"Ben Kempley (UK)" <benjamin.h.kempley@pwc.com></div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Email</span>
+              <span class="badge action-badge" style="background:#b45309">REFER</span>
+            </div>
+            <div class="card-total" style="color:#b45309">17<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Existing client from a prior carve-out integration engagement requests exploratory conversation about a build-and-transfer model to internalize the integration tracker capability with documentation and handover, targeting Q3 planning with no immediate deadline.</p>
+                <p class="rationale-text">This is a knowledge transfer and client enablement request outside FDE's core engineering mandate, better suited for Commercial/Client Service with FDE technical consultation if needed.</p>
+                <div class="action-note refer-note">Refer to: Ben Kempley (named in From field as UK contact) and Deals Commercial/Client Service team — this involves engagement structuring, pricing model for build-and-transfer, client training/enablement, ongoing support terms, and relationship management rather than net-new AI capability development</div>
+                <p class="capacity-note">With 4 available FDEs focused on strategic priorities (Harvey, agentic pipelines, client-facing prototyping), a multi-week documentation and handover engagement would materially impact capacity for higher-priority work.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">Integration Management Office Automation — Utilities Post-Close</div>
+                  <div class="proposal-meta">Post-merger integration &middot; 2025 &middot; 4 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Built an integration tracker with structured status ingestion via Teams adaptive cards, automated consolidation across 340 workstreams, and LLM-generated executive summary in client-approved format. Deployed for 100-day ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> IMO status ingestion schema, Executive summary generation prompt, Teams adaptive card template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Weekly reporting effort reduced from 14 hours to under 2 hours. Client adopted tool independently post-engagement. Executive summary quality rated highly by PE client.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey-Assisted Due Diligence — Healthcare SaaS Acquisition</div>
+                  <div class="proposal-meta">Buy-side due diligence &middot; 2025 &middot; 4 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Configured and deployed Harvey Vault and custom Harvey workflows for a buy-side diligence process on a healthcare SaaS target. Built document ingestion pipeline, issue flagging by category (commercial, legal, technical, ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Harvey diligence workflow configuration, Issue categorisation prompt, Section summary template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence report drafted in 60% of normal time. Issue log generated with full source attribution. Client reused framework on two subsequent deals.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Separation Management Capability — Multi-Entity Carve-Out</div>
+                  <div class="proposal-meta">Separation / carve-out &middot; 2025 &middot; 12 weeks &middot; 3 FDE(s)</div>
+                  <div class="proposal-desc">Designed and built an AI-assisted separation management capability covering document classification and entity ownership mapping, regulatory disclosure tracking, dependency flagging across ERP systems, and executive repo...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Document classification and entity mapping pipeline, Regulatory disclosure gap analysis framework, SMO reporting automation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> 6,000 documents classified and mapped to 12 legal entities in 2 weeks. Regulatory disclosure gaps surfaced 6 weeks before IPO deadline. SMO reporting time reduced by 80%.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>email</td></tr>
+                <tr><td>Source</td><td>Gmail API — live inbox</td></tr>
+                <tr><td>Sender</td><td>"Ben Kempley (UK)" <benjamin.h.kempley@pwc.com></td></tr>
+                <tr><td>Subject</td><td>Build and transfer conversation — AI integration capability</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:53.907813Z</td></tr>
+              </table>
+              <pre class="raw-body">Hi,
+
+My name is Claire Hutchinson, Integration Director at Vantage Industrial Group. We completed a carve-out last year with PwC's support and have been using the integration tracker your team set up for us throughout our integration phase.
+
+I wanted to raise something for a conversation rather than a formal request at this stage. We are thinking about what happens when the PwC engagement winds down in Q2. Rather than the capability disappearing, we would like to understand what a build and transfer model might look like — essentially a version of the tools we are currently using that our own team can own and maintain going forward, with proper documentation and a handover period.
+
+There is no immediate deadline on our end. We are thinking about planning conversations for Q3. But I wanted to raise it now rather than leaving it to the last minute, and I thought it was better to come to you directly given the existing relationship.
+
+Happy to have an informal conversation first if...</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(13,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(13,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(13,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(13,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-13"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-14">
+          <div class="card-header" style="border-left:4px solid #b45309">
+            <div class="card-rank">#14</div>
+            <div class="card-title-block">
+              <div class="card-subject">(Teams message — no subject)</div>
+              <div class="card-sender">Rob Baker — Adoption Lead, Deals Technology</div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Teams</span>
+              <span class="badge action-badge" style="background:#b45309">REFER</span>
+            </div>
+            <div class="card-total" style="color:#b45309">17<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Internal Harvey adoption training request for 40 people across Manchester and Edinburgh offices requiring worked examples and before/after demonstrations for mid-market M&A and restructuring scenarios within six weeks.</p>
+                <p class="rationale-text">Near-identical prior engagement exists with substantial reusable assets that can be directly leveraged, making this a straightforward deployment rather than a net-new FDE build requiring scarce engineering capacity.</p>
+                <div class="action-note refer-note">Refer to: Deals Technology / Adoption Lead (Rob Baker) with guidance to reuse existing Harvey Adoption Sprint assets (Harvey prompt library for mid-market M&A and restructuring, before/after demonstration scripts) potentially with light FDE advisory support rather than full build engagement</div>
+                <p class="capacity-note">With 4 of 12 FDEs available and strategic priority to grow external client-facing work from 30% to 50%, dedicating engineering capacity to internal training delivery that has established reusable assets is suboptimal use of constrained resources.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:100%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">5/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey Adoption Sprint — Deal Team Training</div>
+                  <div class="proposal-meta">Internal enablement &middot; 2026 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Designed sector-specific Harvey worked examples and before/after demonstrations for a mid-market M&A and restructuring audience. Built a library of 40 prompt examples across deal types. Delivered half-day training sessio...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Harvey prompt library — mid-market M&A, Harvey prompt library — restructuring, Before/after demonstration scripts</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Harvey active usage increased 60% in participating offices in the month following training. Prompt library adopted as standard onboarding resource.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey-Assisted Due Diligence — Healthcare SaaS Acquisition</div>
+                  <div class="proposal-meta">Buy-side due diligence &middot; 2025 &middot; 4 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Configured and deployed Harvey Vault and custom Harvey workflows for a buy-side diligence process on a healthcare SaaS target. Built document ingestion pipeline, issue flagging by category (commercial, legal, technical, ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Harvey diligence workflow configuration, Issue categorisation prompt, Section summary template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence report drafted in 60% of normal time. Issue log generated with full source attribution. Client reused framework on two subsequent deals.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey QoE Pre-Processing Pipeline</div>
+                  <div class="proposal-meta">Internal tooling &middot; 2026 &middot; 3 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Built an automated pre-processing pipeline that ingests raw management accounts in varied formats (Excel, PDF, CSV, Word), normalises to a standard financial schema, validates for completeness, flags anomalies, and passe...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Multi-format financial data parser, Schema normalisation pipeline, Harvey API integration module</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Eliminated 2-day manual data preparation step per client. Pipeline adopted as standard pre-processor for all Harvey financial workflows. On roadmap for wider rollout.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>teams</td></tr>
+                <tr><td>Source</td><td>Microsoft Teams — teams_15_rob_baker.json</td></tr>
+                <tr><td>Sender</td><td>Rob Baker — Adoption Lead, Deals Technology</td></tr>
+                <tr><td>Subject</td><td>(Teams message — no subject)</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.718294Z</td></tr>
+              </table>
+              <pre class="raw-body">Planning the next Harvey adoption sprint for the Manchester and Edinburgh offices — around 40 people across grades Associate to Manager, mostly mid-market M&A and restructuring work. Want to run a half-day session with worked examples that feel relevant to their deal types rather than the generic ones from the central deck.
+
+Could FDE help design the example prompts and a short before/after demonstration using a realistic mid-market M&A scenario? Timescale is flexible — sometime in the next six weeks works. No external client. Internal resource only.</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(14,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(14,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(14,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(14,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-14"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-15">
+          <div class="card-header" style="border-left:4px solid #b45309">
+            <div class="card-rank">#15</div>
+            <div class="card-title-block">
+              <div class="card-subject">(Teams message — no subject)</div>
+              <div class="card-sender">Joel Catchatoor — Product Management Lead, Deals Technology</div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Teams</span>
+              <span class="badge action-badge" style="background:#b45309">REFER</span>
+            </div>
+            <div class="card-total" style="color:#b45309">13<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Request for FDE input on LLM-based scope suggestion layer for an internal engagement scoping intake form being redesigned by Deals Technology team.</p>
+                <p class="rationale-text">Low strategic priority administrative tooling request that falls outside FDE's core mandate of embedded M&A transaction work and client-facing AI deployment.</p>
+                <div class="action-note refer-note">Refer to: PwC AgentOS team or Deals Technology's own technical resources</div>
+                <p class="capacity-note">With 4 of 12 FDEs available and strategic focus on growing client-facing work from 30% to 50%, administrative tooling support represents poor allocation of constrained forward-deployed engineering capacity.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">Internal Data Benchmarking Layer — Capital IQ and Origin</div>
+                  <div class="proposal-meta">Internal data infrastructure &middot; 2025 &middot; 8 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed a lightweight internal data layer providing curated, cached access to the most commonly used Capital IQ and Origin benchmarking datasets. Deal teams query via a simple natural language interface rather than pull...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Benchmarking data schema, Natural language query interface, Capital IQ caching pipeline</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Sector benchmarking time reduced from 2-3 days to under 30 minutes. Third-party data costs reduced by 40% through elimination of duplicate pulls across engagements.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">AI Value Creation Diagnostic — Facilities Management Portco</div>
+                  <div class="proposal-meta">Value creation / 100-day plan &middot; 2025 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Conducted a structured half-day diagnostic workshop with a PE client and portco leadership team in the facilities management sector. Produced a prioritised AI opportunity map across scheduling, workforce management, and ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> AI opportunity diagnostic framework, Facilities management use case library, EBITDA impact estimation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Client selected two initiatives for immediate piloting. Opportunity map adopted as board paper. Framework reused for two subsequent portco diagnostics.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey QoE Pre-Processing Pipeline</div>
+                  <div class="proposal-meta">Internal tooling &middot; 2026 &middot; 3 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Built an automated pre-processing pipeline that ingests raw management accounts in varied formats (Excel, PDF, CSV, Word), normalises to a standard financial schema, validates for completeness, flags anomalies, and passe...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Multi-format financial data parser, Schema normalisation pipeline, Harvey API integration module</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Eliminated 2-day manual data preparation step per client. Pipeline adopted as standard pre-processor for all Harvey financial workflows. On roadmap for wider rollout.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>teams</td></tr>
+                <tr><td>Source</td><td>Microsoft Teams — teams_09_joel_catchatoor.json</td></tr>
+                <tr><td>Sender</td><td>Joel Catchatoor — Product Management Lead, Deals Technology</td></tr>
+                <tr><td>Subject</td><td>(Teams message — no subject)</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.717248Z</td></tr>
+              </table>
+              <pre class="raw-body">We're redesigning the internal engagement scoping template — currently a 12-page Word doc that gets completed differently by everyone and then sits in a SharePoint folder no one can find. Proposal is to replace it with a structured digital intake form that auto-populates from DealCloud data and uses a lightweight LLM layer to suggest scope based on the engagement type selected. Would need FDE input on the LLM piece specifically. Everything else we can handle in DTx.
+
+Not urgent — would be good to pick this up in the next fortnight if someone has availability. No external client involved.</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(15,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(15,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(15,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(15,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-15"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-16">
+          <div class="card-header" style="border-left:4px solid #1d4ed8">
+            <div class="card-rank">#16</div>
+            <div class="card-title-block">
+              <div class="card-subject">(Teams message — no subject)</div>
+              <div class="card-sender">Unknown — PA, Unknown</div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Teams</span>
+              <span class="badge action-badge" style="background:#1d4ed8">CLARIFY</span>
+            </div>
+            <div class="card-total" style="color:#1d4ed8">10<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Unstructured request from unknown PA about a partner exploring potential AI use on an unspecified client engagement, possibly Deals-related.</p>
+                <p class="rationale-text">Request lacks all essential information needed for triage including partner name, client context, use case description, service line confirmation, timeline, and scope.</p>
+                <div class="action-note clarify-note">Information needed: Partner name and contact details; client name and industry; specific business problem or workflow being considered; whether this is part of an active Deals engagement; desired timeline and any deadlines; expected scope (diagnostic, prototype, production build); budget or engagement structure.</div>
+                <p class="capacity-note">Team has adequate capacity for intake but cannot commit resources without understanding scope, alignment, and nature of request.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#1d4ed8"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">AI Value Creation Diagnostic — Facilities Management Portco</div>
+                  <div class="proposal-meta">Value creation / 100-day plan &middot; 2025 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Conducted a structured half-day diagnostic workshop with a PE client and portco leadership team in the facilities management sector. Produced a prioritised AI opportunity map across scheduling, workforce management, and ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> AI opportunity diagnostic framework, Facilities management use case library, EBITDA impact estimation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Client selected two initiatives for immediate piloting. Opportunity map adopted as board paper. Framework reused for two subsequent portco diagnostics.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>teams</td></tr>
+                <tr><td>Source</td><td>Microsoft Teams — teams_20_pa_forward.json</td></tr>
+                <tr><td>Sender</td><td>Unknown — PA, Unknown</td></tr>
+                <tr><td>Subject</td><td>(Teams message — no subject)</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.719086Z</td></tr>
+              </table>
+              <pre class="raw-body">One of our partners wants to explore whether AI could help with something on a client engagement. I think it might be a deals thing but I'm not sure. Can someone from the AI team look at this and come back to me?</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(16,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(16,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(16,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(16,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-16"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-17">
+          <div class="card-header" style="border-left:4px solid #b45309">
+            <div class="card-rank">#17</div>
+            <div class="card-title-block">
+              <div class="card-subject">Call   Unknown Associate   Unnamed PE Fund</div>
+              <div class="card-sender">Call   Unknown Associate   Unnamed PE Fund</div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Phone</span>
+              <span class="badge action-badge" style="background:#b45309">REFER</span>
+            </div>
+            <div class="card-total" style="color:#b45309">10<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Unknown associate from unnamed PE fund requests a general overview of AI capabilities for deals, with no defined problem, timeline, budget, or specific use case.</p>
+                <p class="rationale-text">This is a pre-sales exploratory inquiry with insufficient definition to warrant FDE engineering time, and should be handled by business development or Deals leadership first.</p>
+                <div class="action-note refer-note">Refer to: PwC Deals business development or partner relationship team to qualify the opportunity, understand specific pain points, establish fund identity and relationship status, and return with a scoped request if commercial potential is confirmed</div>
+                <p class="capacity-note">With 4 FDEs available, this unscoped exploratory request would inefficiently consume engineering capacity better allocated to defined client engagements or strategic internal builds.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:40%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">2/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:60%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">3/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">Internal Data Benchmarking Layer — Capital IQ and Origin</div>
+                  <div class="proposal-meta">Internal data infrastructure &middot; 2025 &middot; 8 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed a lightweight internal data layer providing curated, cached access to the most commonly used Capital IQ and Origin benchmarking datasets. Deal teams query via a simple natural language interface rather than pull...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Benchmarking data schema, Natural language query interface, Capital IQ caching pipeline</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Sector benchmarking time reduced from 2-3 days to under 30 minutes. Third-party data costs reduced by 40% through elimination of duplicate pulls across engagements.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey-Assisted Due Diligence — Healthcare SaaS Acquisition</div>
+                  <div class="proposal-meta">Buy-side due diligence &middot; 2025 &middot; 4 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Configured and deployed Harvey Vault and custom Harvey workflows for a buy-side diligence process on a healthcare SaaS target. Built document ingestion pipeline, issue flagging by category (commercial, legal, technical, ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Harvey diligence workflow configuration, Issue categorisation prompt, Section summary template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence report drafted in 60% of normal time. Issue log generated with full source attribution. Client reused framework on two subsequent deals.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Repeatable Diligence Playbook — Healthcare PE</div>
+                  <div class="proposal-meta">Buy-side due diligence — repeatable framework &middot; 2025 &middot; 6 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed and built a sector-specific repeatable diligence framework for a healthcare PE fund conducting 10+ deals per year. Codified standard question sets, document checklists, regulatory review criteria (CQC, NHS contr...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Healthcare diligence question library, CQC review prompt, NHS contract clause extractor</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence initiation time reduced from 5 days to under 4 hours per new deal. Framework reused on 8 subsequent processes without modification.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>phone</td></tr>
+                <tr><td>Source</td><td>Otter.ai transcript — Call - Unknown Associate - Unnamed PE Fund_otter_ai.txt</td></tr>
+                <tr><td>Sender</td><td>Call   Unknown Associate   Unnamed PE Fund</td></tr>
+                <tr><td>Subject</td><td>Call   Unknown Associate   Unnamed PE Fund</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:54.720860Z</td></tr>
+              </table>
+              <pre class="raw-body">0:01  
+Ben, yeah, hi, so I've been asked to reach out by some of the partners at our fund. They've been seeing quite a few demos of AI tools lately, and they're pretty excited about what's possible, and they've asked me to look into it, I suppose, for deals specifically, I think they want something that can read documents and flag things, but honestly, I'm not entirely sure what problem they're trying to resolve or solve. Sorry, they haven't really briefed me properly on what they have in mind. Could someone maybe put together a short overview of what you've built and what you do, and I could share it internally. We can go from there. I genuinely don't have a timeline or a budget or anything like that at this stage, it's more of a, let's see what's out there, kind of conversation. Sorry, I can't give you more than that. I'm just trying to get the ball rolling on their behalf. Do.
+
+Transcribed by https://otter.ai</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(17,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(17,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(17,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(17,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-17"></span>
+            </div>
+          </div>
+        </div>
+        <div class="card" id="card-18">
+          <div class="card-header" style="border-left:4px solid #b45309">
+            <div class="card-rank">#18</div>
+            <div class="card-title-block">
+              <div class="card-subject">FDE, review your Google Account settings</div>
+              <div class="card-sender">Google <no-reply@google.com></div>
+            </div>
+            <div class="card-badges">
+              <span class="badge channel-badge">Email</span>
+              <span class="badge action-badge" style="background:#b45309">REFER</span>
+            </div>
+            <div class="card-total" style="color:#b45309">6<span class="of-30">/30</span></div>
+          </div>
+          <div class="card-body">
+            <div class="two-col">
+              <div class="col-left">
+                <div class="section-label">Qualification</div>
+                <p class="summary-text">Automated Google Account setup email with no actual work request or engagement opportunity for FDE team.</p>
+                <p class="rationale-text">This is a generic automated email from Google about account settings, not a legitimate FDE work request.</p>
+                <div class="action-note refer-note">Refer to: IT support or delete/ignore - this is not a business request and appears to be spam or misdirected automated email</div>
+                <p class="capacity-note">No FDE capacity required as this is not a valid engagement request.</p>
+                <div class="indicators">
+                <div class="ind-row">
+                  <span class="ind-label">Request Completeness</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Strategic Alignment</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Complexity and Effort</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Commercial Profile</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Reuse Potential</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div>
+                <div class="ind-row">
+                  <span class="ind-label">Time Sensitivity</span>
+                  <div class="ind-track">
+                    <div class="ind-fill" style="width:20%;background:#b45309"></div>
+                  </div>
+                  <span class="ind-val">1/5</span>
+                </div></div>
+              </div>
+              <div class="col-right">
+                <div class="section-label">Proposal Accelerator — matched prior engagements</div>
+                
+                <div class="proposal-card">
+                  <div class="proposal-title">Repeatable Diligence Playbook — Healthcare PE</div>
+                  <div class="proposal-meta">Buy-side due diligence — repeatable framework &middot; 2025 &middot; 6 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Designed and built a sector-specific repeatable diligence framework for a healthcare PE fund conducting 10+ deals per year. Codified standard question sets, document checklists, regulatory review criteria (CQC, NHS contr...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Healthcare diligence question library, CQC review prompt, NHS contract clause extractor</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence initiation time reduced from 5 days to under 4 hours per new deal. Framework reused on 8 subsequent processes without modification.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">Harvey-Assisted Due Diligence — Healthcare SaaS Acquisition</div>
+                  <div class="proposal-meta">Buy-side due diligence &middot; 2025 &middot; 4 weeks &middot; 2 FDE(s)</div>
+                  <div class="proposal-desc">Configured and deployed Harvey Vault and custom Harvey workflows for a buy-side diligence process on a healthcare SaaS target. Built document ingestion pipeline, issue flagging by category (commercial, legal, technical, ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> Harvey diligence workflow configuration, Issue categorisation prompt, Section summary template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Diligence report drafted in 60% of normal time. Issue log generated with full source attribution. Client reused framework on two subsequent deals.</div>
+                </div>
+                <div class="proposal-card">
+                  <div class="proposal-title">AI Value Creation Diagnostic — Facilities Management Portco</div>
+                  <div class="proposal-meta">Value creation / 100-day plan &middot; 2025 &middot; 2 weeks &middot; 1 FDE(s)</div>
+                  <div class="proposal-desc">Conducted a structured half-day diagnostic workshop with a PE client and portco leadership team in the facilities management sector. Produced a prioritised AI opportunity map across scheduling, workforce management, and ...</div>
+                  <div class="proposal-assets"><strong>Reusable assets:</strong> AI opportunity diagnostic framework, Facilities management use case library, EBITDA impact estimation template</div>
+                  <div class="proposal-outcome"><strong>Outcome:</strong> Client selected two initiatives for immediate piloting. Opportunity map adopted as board paper. Framework reused for two subsequent portco diagnostics.</div>
+                </div>
+              </div>
+            </div>
+            <details class="raw-detail">
+              <summary>Structured intake record</summary>
+              <table class="intake-table">
+                <tr><td>Channel</td><td>email</td></tr>
+                <tr><td>Source</td><td>Gmail API — live inbox</td></tr>
+                <tr><td>Sender</td><td>Google <no-reply@google.com></td></tr>
+                <tr><td>Subject</td><td>FDE, review your Google Account settings</td></tr>
+                <tr><td>Ingested</td><td>2026-04-28T10:14:53.332932Z</td></tr>
+              </table>
+              <pre class="raw-body">Hi FDE,
+
+Welcome to Google on your new PC. Here are a few tips to get you started.
+
+Control your account
+
+Choose what's right for you. Review and adjust your privacy and security  
+settings any time
+
+Continue  
+<https://c.gle/AOExmq1NYPmOBlRo5xvKakYm8_AcwvqjXjmTQg0SyLArjFwmqAOXc0oc1vV38WCz1gkno89sGb6uADh9VMNOLtvk3pSh-BqZgHMIQhgR2PaDSsmNK9XxPPVhEHN5RY1TdZKcVufGJjGwqFPDZT5ccAjk9JtZnDa4AF_JIeCEyxcfMkzYYGGQQexKzt26wq2r51BotHH3gMAN3aXZNHM2_PmLN6HxZeA>
+
+Browse the web using Google Chrome
+
+Choose Chrome, the browser by Google
+
+Chrome updates every 4 weeks, so you can get the latest safety features and  
+fixes, protecting you from security threats like malware or phishing
+
+Get Chrome  
+<https://c.gle/AOExmq2tR7FCIhdo0lWkYOg2imkTQJ13iGHKZCwUH6vJ3I_vYXp8NwHWscItFL8cRbyYVRuSoyEBH8D2ZQftF8xHUtGJCtpvlrvX0HF1qcj8V_dQ9CNYb62vaq1Uy9BNfG6V04a_p4gE3_vknEGsULRSrqb893o1dRheqpbxFKHShQZzof0x9KtZSBU0_Q35xhCx3QsNtfF6_01IMijyY7IZrL3aJBf1keGDaLYrF1SZrTnsF5nEWK-BCBnaPQjRuTp_kjZ6uEr3gRS_v_uwmC...</pre>
+            </details>
+            <div class="decision-bar">
+              <span class="decision-label">Log outcome:</span>
+              <button onclick="logDecision(18,'accepted')" class="dec-btn dec-accept">Accepted</button>
+              <button onclick="logDecision(18,'declined')" class="dec-btn dec-decline">Declined</button>
+              <button onclick="logDecision(18,'deferred')" class="dec-btn dec-defer">Deferred</button>
+              <button onclick="logDecision(18,'referred')" class="dec-btn dec-refer">Referred</button>
+              <span class="dec-status" id="dec-status-18"></span>
+            </div>
+          </div>
+        </div>
+  
+</div>
+
+<footer>
+  <span>PwC Deals AI &middot; FDE Intelligent Opportunity Triage &middot; Built by Ben Kempley</span>
+  <span>Sources: Gmail API (live) &middot; Microsoft Teams JSON &middot; Otter.ai transcripts</span>
+</footer>
+
+<script>
+const sessionDecisions = {};
+function logDecision(rank, outcome) {
+  sessionDecisions[rank] = { rank, outcome, logged_at: new Date().toISOString() };
+  const el = document.getElementById('dec-status-' + rank);
+  if (el) el.textContent = 'Logged: ' + outcome + ' at ' + new Date().toLocaleTimeString();
+  console.log('Decision log:', JSON.stringify(sessionDecisions, null, 2));
+}
+</script>
+
+</body>
+</html>
